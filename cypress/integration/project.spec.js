@@ -1,5 +1,5 @@
 const API_URL = "https://api.mercadolibre.com/sites/MLB/search?q=$computador"
-const PROJECT_URL = './index.html'
+const PROJECT_URL = 'andrey/index.html'
 
 const LOADING = '.loading';
 const ITEM_SELECTOR = '.item';
@@ -13,7 +13,8 @@ const addToCart = (index) => {
     .should('exist')
     .eq(index)
     .children(ADD_CART_BUTTON)
-    .click();
+    .click()
+    .wait(2000);
 }
 
 const countCart = (amount) => {
@@ -27,7 +28,7 @@ const checkPrice = (results, indexes) => {
   let total = 0;
   indexes.forEach(index => total += results[index].price);
   cy.get(TOTAL_PRICE)
-      .should('have.value', total.toString());
+      .should('have.text', total.toString());
 }
 
 describe('Shopping Cart Project', () => {
@@ -38,8 +39,11 @@ describe('Shopping Cart Project', () => {
       .then((response) => response.json())
       .then((data) => {
         results = data.results
+        console.log(results[36]);
       })
+      
   })
+  
 
   beforeEach(() => {
     cy.get(EMPTY_CART_BUTTON)
