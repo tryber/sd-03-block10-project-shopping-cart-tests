@@ -1,9 +1,9 @@
 {
   "project": {
-    "name": "sd-0x-block10-project-shopping-cart",
+    "name": "tryber/sd-03-block10-project-shopping-cart",
     "description": "Projeto de Carrinho de Compras",
     "enabled": true,
-    "deadline": "YYYY-MM-DD 17:10:00",
+    "deadline": "2020-04-14 17:10:00",
     "requirements": [
       {
         "description": "Listagem de produtos",
