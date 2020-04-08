@@ -1,5 +1,5 @@
 const API_URL = "https://api.mercadolibre.com/sites/MLB/search?q=$computador"
-const PROJECT_URL = 'henrique/index.html'
+const PROJECT_URL = './index.html'
 
 const LOADING = '.loading';
 const ITEM_SELECTOR = '.item';
