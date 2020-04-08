@@ -32,9 +32,9 @@ const checkPrice = (results, indexes) => {
 }
 
 describe('Shopping Cart Project', () => {
+  let results;
   before(() => {
     cy.visit(PROJECT_URL);
-    let results;
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
