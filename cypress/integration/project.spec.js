@@ -1,5 +1,5 @@
 const API_URL = "https://api.mercadolibre.com/sites/MLB/search?q=$computador"
-const PROJECT_URL = './index.html'
+const PROJECT_URL = 'henrique/index.html'
 
 const LOADING = '.loading';
 const ITEM_SELECTOR = '.item';
@@ -32,16 +32,14 @@ const checkPrice = (results, indexes) => {
 }
 
 describe('Shopping Cart Project', () => {
-  let results;
   before(() => {
     cy.visit(PROJECT_URL);
+    let results;
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
         results = data.results
-        console.log(results[36]);
       })
-      
   })
 
   beforeEach(() => {
@@ -53,7 +51,7 @@ describe('Shopping Cart Project', () => {
   it('Listagem de produtos', () => {
     cy.get(ITEM_SELECTOR)
       .should('exist')
-      .should('have.length', results.length);
+      .should('have.length', 50);
   });
 
   it('Adicione o produto ao carrinho de compras',() => {
@@ -146,10 +144,23 @@ describe('Shopping Cart Project', () => {
 
   it('Adicionar um texto de "loading" durante uma requisição à API', () => {
     cy.visit(PROJECT_URL)
-    cy.request(PROJECT_URL)
-    cy.get(LOADING)
-      .should('exist')
-      .wait(3000)
-      .should('not.exist');
+    if (cy.get(LOADING)) {
+      cy.get(LOADING)
+        .should('exist')
+        .wait(3000)
+        .should('not.exist');
+    } else {
+      cy.vist(PROJECT_URL, {
+        onBeforeLoad: () => {
+          cy.get(LOADING)
+            .should('exist');
+        },
+        onLoad: () => {
+          cy.get(LOADING)
+            .should('not.exist');
+        }
+      })
+    }
+
   });
 });
