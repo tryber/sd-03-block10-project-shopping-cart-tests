@@ -1,7 +1,8 @@
 const API_URL = "https://api.mercadolibre.com/sites/MLB/search?q=$computador"
-const PROJECT_URL = './index.html'
+const PROJECT_URL = 'andrey/index.html'
 
 const LOADING = '.loading';
+const ITEMS = '.items';
 const ITEM_SELECTOR = '.item';
 const ADD_CART_BUTTON = '.item__add'
 const CART_ITEMS = '.cart__items'
@@ -9,8 +10,8 @@ const EMPTY_CART_BUTTON = '.empty-cart'
 const TOTAL_PRICE = '.total-price'
 
 const addToCart = (index) => {
-  cy.get(ITEM_SELECTOR)
-    .should('exist')
+  cy.get(ITEMS)
+    .children()
     .eq(index)
     .children(ADD_CART_BUTTON)
     .click()
@@ -23,30 +24,30 @@ const countCart = (amount) => {
       .should('have.length', amount);
 }
 
-const checkPrice = (results, indexes) => {
-  cy.wait(1000);
-  let total = 0;
-  indexes.forEach(index => total += results[index].price);
-  cy.get(TOTAL_PRICE)
-      .should('have.text', total.toString());
+const checkPrice = () => {
+  cy.get(CART_ITEMS)
+    .children()
+    .then((items) => {
+      let total = 0;
+      Array.from(items).forEach((item) => {
+        let itemInfo = item.innerText.split('$');
+        total += parseFloat(itemInfo[1]);
+      })
+      cy.get(TOTAL_PRICE)
+          .should('have.text', total.toString());
+    })
 }
 
 describe('Shopping Cart Project', () => {
-  let results;
-  before(() => {
-    cy.visit(PROJECT_URL);
-    fetch(API_URL)
-      .then((response) => response.json())
-      .then((data) => {
-        results = data.results
-      })
-  })
 
-  beforeEach(() => {
-    cy.get(EMPTY_CART_BUTTON)
-      .click()
-    cy.clearLocalStorage();
+
+  before(() => {
+    cy.visit(PROJECT_URL); 
   });
+
+  afterEach(() => {
+    cy.clearLocalStorage();
+  })
 
   it('Listagem de produtos', () => {
     cy.get(ITEM_SELECTOR)
@@ -61,13 +62,28 @@ describe('Shopping Cart Project', () => {
     cy.get(CART_ITEMS)
       .children()
       .first()
-      .should('not.have.length', 0)
+      .then((data) => {
+        let cartItem = data[0].innerText.split('|').map( element => element.trim() );
+        cy.get(ITEMS)
+          .children()
+          .eq(36)
+          .children()
+          .then((data) => {
+            let itemInfo = Array.from(data);
+            expect(cartItem[0]).to.deep.equal(`SKU: ${itemInfo[0].innerText}`)
+            expect(cartItem[1]).to.deep.equal(`NAME: ${itemInfo[1].innerText}`);
+          })
+      })
   });
 
   it('Remova o item do carrinho de compras ao clicar nele', () => {
-    addToCart(29);
-    addToCart(31);
-    addToCart(15);
+    cy.visit(PROJECT_URL, {
+      onLoad: () => {
+        addToCart(29)
+        addToCart(31)
+        addToCart(15)
+      }
+    })
     cy.get(CART_ITEMS)
       .children()
       .eq(1)
@@ -90,8 +106,7 @@ describe('Shopping Cart Project', () => {
     let first = 36;
     let last = 29;
 
-    cy.visit(PROJECT_URL);
-    cy.wait(1000);
+    cy.visit(PROJECT_URL)
     addToCart(first);
     countCart(1);
     cy.get(CART_ITEMS)
@@ -104,7 +119,7 @@ describe('Shopping Cart Project', () => {
       .last()
       .should('not.have.length', 0)
     countCart(2);
-    cy.reload()
+    cy.visit(PROJECT_URL)
     countCart(2);
     cy.get(CART_ITEMS)
       .children()
@@ -118,18 +133,18 @@ describe('Shopping Cart Project', () => {
 
   it('Some o valor total dos itens do carrinho de compras de forma assíncrona', () => {
     addToCart(5);
-    checkPrice(results, [5]);
+    checkPrice();
     addToCart(42);
-    checkPrice(results, [5, 42]);
+    checkPrice();
     addToCart(36);
-    checkPrice(results, [5, 42, 36]);
+    checkPrice();
     addToCart(15);
-    checkPrice(results, [5, 42, 36, 15]);
+    checkPrice();
     cy.get(CART_ITEMS)
       .children()
       .eq(1)
       .click()
-    checkPrice(results, [5, 36, 15]);
+    checkPrice();
   });
 
   it('Botão para limpar carrinho de compras', () => {
