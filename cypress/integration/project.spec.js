@@ -31,6 +31,7 @@ const checkPrice = () => {
         let itemInfo = item.innerText.split('$');
         total += parseFloat(itemInfo[1]);
       })
+      total = Math.round(total * 100) / 100;
       cy.get(TOTAL_PRICE)
           .should('have.text', total.toString());
     })
