@@ -1,8 +1,7 @@
 const API_URL = "https://api.mercadolibre.com/sites/MLB/search?q=$computador"
-const PROJECT_URL = 'andrey/index.html'
+const PROJECT_URL = './index.html'
 
 const LOADING = '.loading';
-const ITEMS = '.items';
 const ITEM_SELECTOR = '.item';
 const ADD_CART_BUTTON = '.item__add'
 const CART_ITEMS = '.cart__items'
@@ -10,8 +9,7 @@ const EMPTY_CART_BUTTON = '.empty-cart'
 const TOTAL_PRICE = '.total-price'
 
 const addToCart = (index) => {
-  cy.get(ITEMS)
-    .children()
+  cy.get(ITEM_SELECTOR)
     .eq(index)
     .children(ADD_CART_BUTTON)
     .click()
@@ -39,15 +37,20 @@ const checkPrice = () => {
 }
 
 describe('Shopping Cart Project', () => {
-
-
+  
   before(() => {
     cy.visit(PROJECT_URL); 
   });
 
-  afterEach(() => {
-    cy.clearLocalStorage();
+  beforeEach(() => {
+    cy.reload();
   })
+
+  afterEach(() => {
+    cy.window().then((win) => {
+      win.localStorage.clear();
+    })
+  });
 
   it('Listagem de produtos', () => {
     cy.get(ITEM_SELECTOR)
@@ -64,8 +67,7 @@ describe('Shopping Cart Project', () => {
       .first()
       .then((data) => {
         let cartItem = data[0].innerText.split('|').map( element => element.trim() );
-        cy.get(ITEMS)
-          .children()
+        cy.get(ITEM_SELECTOR)
           .eq(36)
           .children()
           .then((data) => {
@@ -77,13 +79,9 @@ describe('Shopping Cart Project', () => {
   });
 
   it('Remova o item do carrinho de compras ao clicar nele', () => {
-    cy.visit(PROJECT_URL, {
-      onLoad: () => {
-        addToCart(29)
-        addToCart(31)
-        addToCart(15)
-      }
-    })
+    addToCart(29)
+    addToCart(31)
+    addToCart(15)
     cy.get(CART_ITEMS)
       .children()
       .eq(1)
@@ -99,7 +97,6 @@ describe('Shopping Cart Project', () => {
       .eq(0)
       .click()
     countCart(0);
-
   });
 
   it('Carregue o carrinho de compras através do **LocalStorage** ao iniciar a página', () => {
